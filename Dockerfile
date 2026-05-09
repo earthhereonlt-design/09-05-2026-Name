@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 \
     libxfixes3 libxrandr2 libgbm1 libasound2 \
     libpango-1.0-0 libcairo2 libatspi2.0-0 \
+    fonts-dejavu fonts-unifont fontconfig \
     --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -15,7 +16,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Playwright browser
+# Install Playwright browser and dependencies
 RUN playwright install chromium
 RUN playwright install-deps chromium
 
