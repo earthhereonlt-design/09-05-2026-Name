@@ -1,16 +1,16 @@
 import asyncio
-import os
 import time
 from aiogram import Bot
 from bot.checker.instagram import InstagramChecker
 from bot.generator.username import generate_usernames
 from bot.database import db
 from bot.utils.helpers import log, random_delay, format_duration
+from bot.config import Config
 
-RATE_LIMIT_COOLDOWN = int(os.getenv("RATE_LIMIT_COOLDOWN", "60"))   # seconds
-BATCH_DELAY        = float(os.getenv("BATCH_DELAY", "3.0"))         # between batches
-CHECK_DELAY_MIN    = float(os.getenv("CHECK_DELAY_MIN", "2.5"))
-CHECK_DELAY_MAX    = float(os.getenv("CHECK_DELAY_MAX", "5.0"))
+RATE_LIMIT_COOLDOWN = Config.RATE_LIMIT_COOLDOWN
+BATCH_DELAY = Config.BATCH_DELAY
+CHECK_DELAY_MIN = Config.CHECK_DELAY_MIN
+CHECK_DELAY_MAX = Config.CHECK_DELAY_MAX
 
 
 class BotRunner:

@@ -4,6 +4,17 @@ Async Telegram bot that uses AI to generate and check Instagram username availab
 
 ---
 
+## 🚀 Quick Deployment
+
+**Only need 3 environment variables:**
+- `TELEGRAM_BOT_TOKEN` — Get from @BotFather
+- `TELEGRAM_CHAT_ID` — Your chat ID  
+- `OPENROUTER_API_KEY` — Get from https://openrouter.ai
+
+**See [DEPLOYMENT.md](DEPLOYMENT.md) for step-by-step instructions.**
+
+---
+
 ## Prerequisites
 
 - Python 3.12+
@@ -41,6 +52,8 @@ python -m bot.main
 
 ---
 
+---
+
 ## Getting Your Chat ID
 
 1. Start a conversation with your bot
@@ -50,25 +63,30 @@ python -m bot.main
 
 ---
 
+## Environment Variables
+
+**Required (3):**
+- `TELEGRAM_BOT_TOKEN` — Telegram bot token
+- `TELEGRAM_CHAT_ID` — Your Telegram chat ID
+- `OPENROUTER_API_KEY` — OpenRouter API key
+
+**Optional (have sensible defaults):**
+- `OPENROUTER_MODEL` — AI model (default: mistral-7b)
+- `RATE_LIMIT_COOLDOWN` — Cooldown after rate limit (default: 60s)
+- `BATCH_DELAY` — Delay between batches (default: 3s)
+- `CHECK_DELAY_MIN/MAX` — Delay between checks (default: 2.5-5s)
+
+---
+
 ## Railway Deployment
 
-### 1. Push your code to GitHub
+1. Push code to GitHub
+2. Go to https://railway.app → "New Project" → "Deploy from GitHub"
+3. Add 3 required environment variables
+4. Create a volume at `/app/data` for persistence
+5. Deploy!
 
-### 2. Go to https://railway.app → New Project → Deploy from GitHub Repo
-
-### 3. Set Environment Variables in Railway dashboard:
-   TELEGRAM_BOT_TOKEN=...
-   TELEGRAM_CHAT_ID=...
-   OPENROUTER_API_KEY=...
-   OPENROUTER_MODEL=mistralai/mistral-7b-instruct
-
-### 4. Railway will auto-detect the Dockerfile and deploy
-
-### 5. Add a Volume in Railway:
-   - Mount path: /app/data
-   - This persists your SQLite database across restarts
-
-### 6. After deploy, send /run to your bot in Telegram
+**See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions with screenshots.**
 
 ---
 

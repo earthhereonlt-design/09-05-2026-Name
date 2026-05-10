@@ -1,13 +1,13 @@
-import os
 import json
 import asyncio
 import httpx
 from bot.database import db
 from bot.utils.helpers import log
+from bot.config import Config
 
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
-OPENROUTER_MODEL   = os.getenv("OPENROUTER_MODEL", "mistralai/mistral-7b-instruct")
-OPENROUTER_URL     = "https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_API_KEY = Config.OPENROUTER_API_KEY
+OPENROUTER_MODEL = Config.OPENROUTER_MODEL
+OPENROUTER_URL = Config.OPENROUTER_URL
 
 SYSTEM_PROMPT = """You are a creative username generator. Your only job is to generate Instagram usernames.
 Rules:

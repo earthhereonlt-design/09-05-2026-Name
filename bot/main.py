@@ -1,22 +1,25 @@
 import asyncio
-import os
+import sys
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
+from bot.config import Config
 from bot.database import db
 from bot.handlers.commands import router, get_runner
 from bot.utils.helpers import log
 
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
-CHAT_ID        = int(os.getenv("TELEGRAM_CHAT_ID", "0"))
-
 
 async def main():
+    # Validate config before starting
+    if not Config.validate():
+        sys.exit(1)
+
     # Init DB
     await db.init_db()
 
+    chat_id = int(Config.TELEGRAM_CHAT_ID)
     bot = Bot(
-        token=TELEGRAM_TOKEN,
+        token=Config.TELEGRAM_BOT_TOKEN,
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
     dp = Dispatcher()
@@ -28,10 +31,10 @@ async def main():
     was_running = await db.get_state("running", "0")
     if was_running == "1":
         await log("INFO", "Auto-resuming from previous session")
-        runner = get_runner(bot)
+        runner = get_runner(bot, chat_id)
         asyncio.create_task(runner.start())
         try:
-            await bot.send_message(CHAT_ID, "♻️ Auto-resumed after restart.")
+            await bot.send_message(chat_id, "♻️ Auto-resumed after restart.")
         except Exception:
             pass
 

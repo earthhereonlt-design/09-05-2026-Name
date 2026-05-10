@@ -1,4 +1,3 @@
-import os
 import time
 import asyncio
 from pathlib import Path
@@ -10,14 +9,13 @@ from bot.database import db
 from bot.utils.helpers import format_duration, log
 
 router   = Router()
-CHAT_ID  = int(os.getenv("TELEGRAM_CHAT_ID", "0"))
 _runner: BotRunner | None = None
 
 
-def get_runner(bot: Bot) -> BotRunner:
+def get_runner(bot: Bot, chat_id: int) -> BotRunner:
     global _runner
     if _runner is None:
-        _runner = BotRunner(bot, CHAT_ID)
+        _runner = BotRunner(bot, chat_id)
     return _runner
 
 
