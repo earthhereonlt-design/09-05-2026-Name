@@ -1,6 +1,7 @@
 import asyncio
 import time
 from aiogram import Bot
+from aiogram.types import Message
 from bot.checker.instagram import InstagramChecker
 from bot.generator.username import generate_usernames
 from bot.database import db
@@ -11,6 +12,7 @@ RATE_LIMIT_COOLDOWN = Config.RATE_LIMIT_COOLDOWN
 BATCH_DELAY = Config.BATCH_DELAY
 CHECK_DELAY_MIN = Config.CHECK_DELAY_MIN
 CHECK_DELAY_MAX = Config.CHECK_DELAY_MAX
+MESSAGE_DELETE_TIMEOUT = Config.MESSAGE_DELETE_TIMEOUT
 
 
 class BotRunner:
@@ -24,6 +26,7 @@ class BotRunner:
         self._checker = InstagramChecker()
         self._progress_msg_id: int | None = None
         self._used: set[str] = set()  # in-memory seen set for this session
+        self._found_usernames: list[str] = []  # Track found usernames for display
 
     # ── Public API ──────────────────────────────────────────────────────
 
@@ -130,6 +133,11 @@ class BotRunner:
         start_ts = await db.get_stat("start_time")
         runtime  = format_duration(time.time() - float(start_ts)) if start_ts else "—"
 
+        # Build found usernames list
+        found_list = ""
+        if self._found_usernames:
+            found_list = "\n\n💚 *Found:*\n" + "\n".join(f"`{u}`" for u in self._found_usernames)
+
         text = (
             "🔄 *Username Finder Running*\n\n"
             f"🔍 Checking: `{cur}`\n"
@@ -138,6 +146,7 @@ class BotRunner:
             f"❌ Errors: `{errors}`\n"
             f"⏳ Rate limits: `{rl}`\n"
             f"🕐 Runtime: `{runtime}`"
+            f"{found_list}"
         )
         try:
             if self._progress_msg_id:
@@ -157,7 +166,16 @@ class BotRunner:
 
     async def _notify_available(self, username: str):
         text = f"🟢 *AVAILABLE USERNAME*\n\n`{username}`"
-        await self.bot.send_message(self.chat_id, text, parse_mode="Markdown")
+        try:
+            msg = await self.bot.send_message(self.chat_id, text, parse_mode="Markdown")
+            # Add to display list
+            self._found_usernames.append(username)
+            # Keep only last 5 found usernames in display
+            if len(self._found_usernames) > 5:
+                self._found_usernames = self._found_usernames[-5:]
+            # DO NOT auto-delete found username messages - keep them permanently
+        except Exception:
+            pass
 
     async def _send_cooldown_notice(self):
         try:

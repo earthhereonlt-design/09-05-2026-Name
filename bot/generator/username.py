@@ -5,70 +5,98 @@ from bot.database import db
 from bot.utils.helpers import log
 from bot.config import Config
 
-OPENROUTER_API_KEY = Config.OPENROUTER_API_KEY
-OPENROUTER_MODEL = Config.OPENROUTER_MODEL
-OPENROUTER_URL = Config.OPENROUTER_URL
+GEMINI_API_KEY = Config.GEMINI_API_KEY
+GEMINI_URL = Config.GEMINI_URL
 
-SYSTEM_PROMPT = """You are a creative username generator. Your only job is to generate Instagram usernames.
-Rules:
-- Bases ONLY: adi, aadi (and close variants like ad, aad)
-- Separators: . or _ (use sparingly, not always)
-- Lowercase only
-- Tech / dev / startup aesthetic
-- Short and clean (4–10 chars total)
-- Suffixes allowed: .js .py .io .sh .xp .go .rs .ts .dev .ui .ux .ai .co .core .app .run .lab
-- Sometimes 2-letter suffixes
-- No cringe, no numbers, no underscores back-to-back
-- No duplicates within the batch
-Return ONLY a JSON array of exactly 25 strings. No explanation. No markdown."""
+# Pattern variations provided by user
+DOT_SUFFIXES = [
+    "ai", "ml", "vr", "xr", "db", "ui", "ux", "os", "gg", "ff", 
+    "tt", "dev", "it", "cc", "tv", "rx", "tx", "dx", "cx", "pk", 
+    "kz", "jp", "kr", "uk", "us", "in", "qa", "id", "am", "io",
+    "co", "me", "tv", "app", "web"
+]
 
-USER_PROMPT = """Generate 25 unique Instagram-style usernames using the bases: adi, aadi (and variants ad, aad).
-Already used (skip these): {used}
-Return ONLY a valid JSON array."""
+UNDERSCORE_SUFFIXES = [
+    "ai", "ml", "vr", "xr", "db", "ui", "ux", "os", "rx", "tx",
+    "dx", "cx", "pk", "jp", "kr", "uk", "us", "in", "id", "am",
+    "bot", "dev", "app", "pro", "lab"
+]
+
+BASES = ["aadi", "adi", "aa", "ad"]
+
+SYSTEM_PROMPT = """You are a username generator for Instagram usernames in the format of:
+- base (aadi, adi, aa, ad) + dot + suffix (ai, ml, dev, io, etc.)
+- base + underscore + suffix
+- base + 2 letter country codes (us, uk, in, jp, etc.)
+
+Examples: aadi.ai, aadi_ml, adi.dev, aa.io, ad_px
+
+Generate ONLY usernames following these patterns. Return ONLY a valid JSON array of 30 unique strings. No explanations."""
 
 async def generate_usernames(used: set[str]) -> list[str]:
-    """Call OpenRouter and return 25 fresh usernames."""
-    used_sample = list(used)[-60:] if len(used) > 60 else list(used)
+    """Call Gemini API and return 30 fresh usernames."""
+    used_sample = list(used)[-30:] if len(used) > 30 else list(used)
+    
+    user_prompt = f"""Generate 30 unique Instagram usernames using patterns like:
+- aadi.ai, aadi.ml, aadi.dev, adi.io, aa.co, ad.tv
+- aadi_ai, aadi_ml, adi_dev, aa_px, ad_us
+
+Skip these (already checked): {', '.join(used_sample) if used_sample else 'none'}
+
+Return ONLY a valid JSON array of 30 strings. Example: ["aadi.ai", "adi_ml", "aa.dev", ...]"""
+
     payload = {
-        "model": OPENROUTER_MODEL,
-        "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user",   "content": USER_PROMPT.format(used=used_sample)},
-        ],
-        "temperature": 0.95,
-        "max_tokens": 400,
+        "contents": [
+            {
+                "parts": [
+                    {"text": user_prompt}
+                ]
+            }
+        ]
     }
+    
     headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://github.com/username-bot",
-        "X-Title": "Instagram Username Finder",
+        "X-goog-api-key": GEMINI_API_KEY
     }
 
     for attempt in range(1, 4):
         try:
             async with httpx.AsyncClient(timeout=30) as client:
-                resp = await client.post(OPENROUTER_URL, json=payload, headers=headers)
+                resp = await client.post(
+                    GEMINI_URL,
+                    json=payload,
+                    headers=headers
+                )
                 resp.raise_for_status()
                 data = resp.json()
-                raw = data["choices"][0]["message"]["content"].strip()
-                # strip markdown fences if model adds them
-                if raw.startswith("```"):
+                
+                # Extract text from Gemini response
+                raw = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                
+                # Try to parse JSON (strip markdown if present)
+                if "```" in raw:
                     raw = raw.split("```")[1]
                     if raw.startswith("json"):
                         raw = raw[4:]
+                    raw = raw.split("```")[0]
+                
                 usernames: list[str] = json.loads(raw)
-                # sanitise
+                
+                # Sanitize
                 clean = [
                     u.lower().strip()
                     for u in usernames
                     if isinstance(u, str) and 3 <= len(u.strip()) <= 30
                 ]
-                await log("INFO", f"Generated {len(clean)} usernames from AI")
-                return clean[:25]
+                
+                await log("INFO", f"Generated {len(clean)} usernames from Gemini API")
+                return clean[:30]
+                
         except Exception as e:
             await log("WARN", f"Generator attempt {attempt} failed: {e}")
             await asyncio.sleep(3 * attempt)
 
     await log("ERROR", "All generator attempts failed; returning empty list")
     return []
+

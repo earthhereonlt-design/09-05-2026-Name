@@ -1,6 +1,6 @@
 # Instagram Username Finder Bot
 
-Async Telegram bot that uses AI to generate and check Instagram username availability 24/7.
+Async Telegram bot that uses Google's Gemini AI to generate and check Instagram username availability 24/7.
 
 ---
 
@@ -8,8 +8,8 @@ Async Telegram bot that uses AI to generate and check Instagram username availab
 
 **Only need 3 environment variables:**
 - `TELEGRAM_BOT_TOKEN` — Get from @BotFather
-- `TELEGRAM_CHAT_ID` — Your chat ID  
-- `OPENROUTER_API_KEY` — Get from https://openrouter.ai
+- `TELEGRAM_CHAT_ID` — Your Telegram chat ID  
+- `GEMINI_API_KEY` — Get from https://aistudio.google.com/apikey
 
 **See [DEPLOYMENT.md](DEPLOYMENT.md) for step-by-step instructions.**
 
@@ -20,7 +20,7 @@ Async Telegram bot that uses AI to generate and check Instagram username availab
 - Python 3.12+
 - A Telegram bot token (from @BotFather)
 - Your Telegram chat ID
-- An OpenRouter API key (https://openrouter.ai)
+- A Google Gemini API key (https://aistudio.google.com/apikey)
 
 ---
 

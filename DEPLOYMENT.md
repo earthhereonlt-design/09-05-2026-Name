@@ -14,11 +14,11 @@
 2. Send `/start` to the bot
 3. The chat ID will be logged (it's just a number like `123456789`)
 
-#### 🔑 OpenRouter API Key
-1. Go to https://openrouter.ai/keys
-2. Sign up / Log in
-3. Create an API key
-4. Copy it (looks like: `sk-or-...`)
+#### 🔑 Google Gemini API Key
+1. Go to https://aistudio.google.com/apikey
+2. Sign in with your Google account
+3. Click "Create API key" button
+4. Copy your API key
 
 ---
 
@@ -41,11 +41,11 @@
    ```
    TELEGRAM_BOT_TOKEN=your_bot_token_here
    TELEGRAM_CHAT_ID=your_chat_id_here
-   OPENROUTER_API_KEY=your_api_key_here
+   GEMINI_API_KEY=your_gemini_api_key_here
    ```
 
    **Optional** (leave empty or remove if using defaults):
-   - `OPENROUTER_MODEL=mistralai/mistral-7b-instruct`
+   - `MESSAGE_DELETE_TIMEOUT=30` (seconds to auto-delete found username messages)
 
 4. **Click Deploy** ✅
 
@@ -58,16 +58,16 @@
 |----------|-----------|--------------|
 | `TELEGRAM_BOT_TOKEN` | Your bot's authentication token | @BotFather on Telegram |
 | `TELEGRAM_CHAT_ID` | Chat where bot sends messages | Send /start to bot, check logs |
-| `OPENROUTER_API_KEY` | API key for AI model access | https://openrouter.ai/keys |
+| `GEMINI_API_KEY` | API key for Google Gemini AI | https://aistudio.google.com/apikey |
 
 ### Optional (don't need to set - already have good defaults)
 | Variable | Default | What does it do |
 |----------|---------|-----------------|
-| `OPENROUTER_MODEL` | `mistralai/mistral-7b-instruct` | Which AI model to use |
 | `RATE_LIMIT_COOLDOWN` | `60` | Seconds to wait after Instagram rate limits |
 | `BATCH_DELAY` | `3.0` | Seconds between username batches |
 | `CHECK_DELAY_MIN` | `2.5` | Min seconds between checks |
 | `CHECK_DELAY_MAX` | `5.0` | Max seconds between checks |
+| `MESSAGE_DELETE_TIMEOUT` | `30` | Seconds before found username messages auto-delete |
 
 ---
 
