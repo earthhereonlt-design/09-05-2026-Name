@@ -1,7 +1,7 @@
-FROM python:3.12-slim
+FROM ubuntu:22.04
 
-# System deps for Playwright
 RUN apt-get update && apt-get install -y \
+    python3.12 python3-pip \
     wget curl gnupg ca-certificates \
     libglib2.0-0 libnss3 libnspr4 libdbus-1-3 \
     libatk1.0-0 libatk-bridge2.0-0 libcups2 \
