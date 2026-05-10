@@ -4,7 +4,6 @@ FROM python:3.12-slim-bookworm
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
-    apt-transport-https \
     ca-certificates \
     libglib2.0-0 \
     libx11-6 \
@@ -15,8 +14,6 @@ RUN apt-get update && apt-get install -y \
     libnss3 \
     libnspr4 \
     fonts-liberation \
-    libappindicator1 \
-    libindicator7 \
     xdg-utils \
     --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
