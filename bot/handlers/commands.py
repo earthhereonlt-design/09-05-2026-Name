@@ -4,12 +4,14 @@ from pathlib import Path
 from aiogram import Router, Bot
 from aiogram.filters import Command
 from aiogram.types import Message, FSInputFile
+from bot.config import Config
 from bot.services.runner import BotRunner
 from bot.database import db
 from bot.utils.helpers import format_duration, log
 
 router   = Router()
 _runner: BotRunner | None = None
+CHAT_ID = int(Config.TELEGRAM_CHAT_ID)
 
 
 def get_runner(bot: Bot, chat_id: int) -> BotRunner:
@@ -24,11 +26,27 @@ def _guard(message: Message) -> bool:
     return message.chat.id == CHAT_ID
 
 
+@router.message(Command("start"))
+async def cmd_start(message: Message, bot: Bot):
+    if not _guard(message):
+        return
+    await message.answer(
+        "🤖 *Instagram Username Bot*\n\n"
+        "Available commands:\n"
+        "/run - Start the username finder\n"
+        "/stop - Stop the finder\n"
+        "/status - Check bot status\n"
+        "/log - View recent logs\n"
+        "/export - Export available usernames",
+        parse_mode="Markdown"
+    )
+
+
 @router.message(Command("run"))
 async def cmd_run(message: Message, bot: Bot):
     if not _guard(message):
         return
-    runner = get_runner(bot)
+    runner = get_runner(bot, CHAT_ID)
     if runner.is_running:
         await message.answer("⚡ Already running.")
         return
@@ -40,7 +58,7 @@ async def cmd_run(message: Message, bot: Bot):
 async def cmd_stop(message: Message, bot: Bot):
     if not _guard(message):
         return
-    runner = get_runner(bot)
+    runner = get_runner(bot, CHAT_ID)
     if not runner.is_running:
         await message.answer("💤 Not running.")
         return
@@ -53,7 +71,7 @@ async def cmd_stop(message: Message, bot: Bot):
 async def cmd_status(message: Message, bot: Bot):
     if not _guard(message):
         return
-    runner  = get_runner(bot)
+    runner  = get_runner(bot, CHAT_ID)
     checked = await db.get_stat("total_checked")
     avail   = await db.get_stat("total_available")
     errors  = await db.get_stat("total_errors")
